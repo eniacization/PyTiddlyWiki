@@ -1,12 +1,20 @@
 # TODO: implement export_tiddler in TiddlyWiki, in order to handle transclusions
+# TODO: add title and subtitle
+import re
 
 from Tiddler import Tiddler
 
 
 class TiddlyWiki:
 
-    def __init__(self):
+    RE_TITLE = re.compile('<title>(?P<title>[\w\W]*?) — (?P<subtitle>[\w\W]*?)</title>')
+
+    def __init__(self, title=None, subtitle=None, tiddlers=None):
+        self.title = title
+        self.subtitle = subtitle
         self.tiddlers = []
+        if tiddlers is not None:
+            self.add_tiddlers(tiddlers)
 
     def add_tiddler(self, tiddler):
         if tiddler not in self.tiddlers:
@@ -40,12 +48,21 @@ class TiddlyWiki:
         return tiddler in self.tiddlers
 
     @classmethod
+    def parse_title(cls, buffer):
+        match = re.search(cls.RE_TITLE, buffer)
+
+        if match is not None:
+            return match.group('title'), match.group('subtitle')
+        return None, None
+
+    @classmethod
     def parse_from_string(cls, buffer):
         """A TiddlyWiki factory
         Returns a TiddlyWiki instance containing all tiddlers found in string buffer
 
         """
-        tiddly_wiki = cls()
+        title, subtitle = cls.parse_title(buffer)
+        tiddly_wiki = cls(title=title, subtitle=subtitle)
 
         for tiddler in Tiddler.finditer(buffer):
             tiddly_wiki.add_tiddler(tiddler)
@@ -65,3 +82,14 @@ class TiddlyWiki:
 
     def apply(self, algorithm):
         return algorithm.evaluate(self)
+
+
+if __name__ == "__main__":
+
+    tw5 = TiddlyWiki.parse_from_html('./example/empty.html')
+
+    print(tw5.title)
+    print(tw5.subtitle)
+
+    for tiddler in tw5:
+        print(tiddler.title)
