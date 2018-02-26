@@ -5,18 +5,8 @@ from datetime import datetime
 
 class Tw5Mixin:
 
-    RE_TIDDLER = re.compile('<div'
-                            '(?P<options>[\w\W]*?)'
-                            '>\n'
-                            '<pre>'
-                            '(?P<content>[\w\W]*?)</pre>\n'
-                            '</div>')
-
-    RE_OPTION = re.compile('\s+(?P<key>\w+?)=\"(?P<value>[\w\W]+?)\"')
-
-
     @staticmethod
-    def convert_tw5_to_md(text):
+    def convert_tw5_to_md(text, latex_gif=False):
         """convert a tw5-flavored md text to a github-flavored md"""
         assert isinstance(text, str)
 
@@ -47,7 +37,6 @@ class Tw5Mixin:
 
             return '#' * len(match_string) + ' '
 
-
         # convert links without reference
         text = re.sub('\[\[(?P<name>[.^\|]+?)\]\]',
                       '[\g<name>]',
@@ -58,6 +47,7 @@ class Tw5Mixin:
                       '[\g<name>](\g<link>)',
                       text)
 
+        # TODO: images are not converted to pdf correctly
         # convert images
         text = re.sub('\[[\s]*img(?P<options>[\w\W]*?)\[(?P<link>[\w\W]+?)\]\]',
                       '\![\g<options>](\g<link>)',
@@ -75,27 +65,50 @@ class Tw5Mixin:
                       text,
                       flags=re.MULTILINE)
 
-        # change ''bold'' to **bold**
+        # convert ''bold'' to **bold**
         text = re.sub('\'\'(?P<phrase>[\w\W]+?)\'\'',
                       '**\g<phrase>**',
                       text)
 
-        # change //italic// to *italic*
+        # TODO: do not convert slashes in urls
+        # convert //italic// to *italic*
         text = re.sub('//(?P<phrase>[\w\W]+?)//',
                       '*\g<phrase>*',
                       text)
 
-        # replace latex by gif image with codecogs.com
-        text = re.sub('\$\$(?P<math>.+?)\$\$',
-                      '![\g<math>](https://latex.codecogs.com/gif.latex?\g<math>)',
-                      text)
+        # convert &lt; to <
+        text = re.sub(r'&lt;', r'<', text)
+
+        # convert &gt; to >
+        text = re.sub(r'&gt;', r'>', text)
+
+        # remove single ~ in front of words
+        text = re.sub('(?<=\s)~(?!~)', '', text)
+
+        # convert block quote
+        matches = list(re.finditer('^<<<(?P<quote>[\w\W]*?)<<<(?P<ref>[\w\W]*?)(?=\n)', text, flags=re.MULTILINE))
+        while matches:
+            match = matches.pop()
+            quote = match.group('quote')
+            quote = re.sub('\n', '\n> ', quote)
+            text = text[:match.start()] + quote + match.group('ref') + text[match.end():]
+
+        if latex_gif:
+            # replace latex by gif image with codecogs.com
+            text = re.sub('\$\$(?P<math>.+?)\$\$',
+                          '![\g<math>](https://latex.codecogs.com/gif.latex?\g<math>)',
+                          text)
+        else:
+            # convert $$ to $
+            # TODO: drawback: inline formulas of the form 'some text $$ a^2 $$ some text' are not matched
+            # TODO: two consecutive centered formula may lead to string '$$$$', which should not be converted
+            text = re.sub('((?<!\n)\$\$|\$\$(?!\n))',
+                          '$',
+                          text)
+
+        # TODO: convert tables
 
         return text
-
-    # TODO: need to implement
-    @staticmethod
-    def convert_tw5_to_tex(text):
-        pass
 
     @staticmethod
     def get_tag_list(tag_string):
