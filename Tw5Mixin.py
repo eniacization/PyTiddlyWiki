@@ -20,9 +20,7 @@ class Tw5Mixin:
             result = '  ' * (len(match_string) - 1)
 
             # add bullet or number
-            if len(match_string) == 0:
-                result = ''
-            elif match_string[-1] == '*':
+            if match_string[-1] == '*':
                 result += '* ' # the ending space is important
             elif match_string[-1] == '#':
                 result += '1. ' # the ending space is important
@@ -47,51 +45,59 @@ class Tw5Mixin:
                       '[\g<name>](\g<link>)',
                       text)
 
-        # TODO: images are not converted to pdf correctly
+        # TODO: linked images on the web are not included correctly in pdf
         # convert images
         text = re.sub('\[[\s]*img(?P<options>[\w\W]*?)\[(?P<link>[\w\W]+?)\]\]',
                       '\![\g<options>](\g<link>)',
                       text)
 
         # convert list-symbols * and #
-        text = re.sub('^(?P<list_symbols>[*#\t ]+)',
+        text = re.sub('^(?P<list_symbols>[\t ]*[*#]+[*#\t ]*)',
                       convert_list_symbols,
                       text,
                       flags=re.MULTILINE)
 
         # convert headings, i.e. change ! caption to # caption
-        text = re.sub('^(?P<heading>[!\t ]+)',
+        text = re.sub('^(?P<heading>[\t ]*[!]+[!\t ]*)',
                       convert_heading,
                       text,
                       flags=re.MULTILINE)
 
-        # convert ''bold'' to **bold**
+        # convert ''bold'' to __bold__
         text = re.sub('\'\'(?P<phrase>[\w\W]+?)\'\'',
-                      '**\g<phrase>**',
+                      '__\g<phrase>__',
                       text)
 
         # TODO: do not convert slashes in urls
-        # convert //italic// to *italic*
+        # convert //italic// to _italic_
         text = re.sub('//(?P<phrase>[\w\W]+?)//',
-                      '*\g<phrase>*',
+                      '_\g<phrase>_',
                       text)
 
         # convert &lt; to <
-        text = re.sub(r'&lt;', r'<', text)
+        text = re.sub('&lt;', '<', text)
 
         # convert &gt; to >
-        text = re.sub(r'&gt;', r'>', text)
+        text = re.sub('&gt;', '>', text)
+
+        # convert &amp; to &
+        text = re.sub('&amp;', '&', text)
 
         # remove single ~ in front of words
         text = re.sub('(?<=\s)~(?!~)', '', text)
 
         # convert block quote
-        matches = list(re.finditer('^<<<(?P<quote>[\w\W]*?)<<<(?P<ref>[\w\W]*?)(?=\n)', text, flags=re.MULTILINE))
+        matches = list(re.finditer('^<<<[\t ]*(?P<quote>[\w\W]*?)<<<(?P<ref>[\w\W]*?)(?=\n)', text, flags=re.MULTILINE))
         while matches:
             match = matches.pop()
             quote = match.group('quote')
             quote = re.sub('\n', '\n> ', quote)
-            text = text[:match.start()] + quote + match.group('ref') + text[match.end():]
+            quote = '> ' + quote
+            ref = match.group('ref').strip()
+            if ref:
+                quote += '({})'.format(ref)
+
+            text = text[:match.start()] + quote + text[match.end():]
 
         if latex_gif:
             # replace latex by gif image with codecogs.com
@@ -102,11 +108,12 @@ class Tw5Mixin:
             # convert $$ to $
             # TODO: drawback: inline formulas of the form 'some text $$ a^2 $$ some text' are not matched
             # TODO: two consecutive centered formula may lead to string '$$$$', which should not be converted
-            text = re.sub('((?<!\n)\$\$|\$\$(?!\n))',
+            text = re.sub('((?<!\n)\$\$|\$\$(?!\n|$))',
                           '$',
                           text)
 
         # TODO: convert tables
+        # TODO: convert definitions
 
         return text
 
