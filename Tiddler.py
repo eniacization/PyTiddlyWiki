@@ -111,14 +111,14 @@ class Tiddler(Tw5Mixin):
 
         return pypandoc.convert_text(result, format, format='md')
 
-    def export_content(self, format='md', latex_gif=False, encoding='utf-8'):
+    def export_content(self, format='md', encoding='utf-8'):
         '''export the tiddler content.
         format is any valid pandoc format specifier.
         first, the tiddler content is converted to github flavored markdown.
         then pypandoc is used to convert the md file to the desired format.
         '''
         if self.type_ == 'text/vnd.tiddlywiki':
-            content = type(self).convert_tw5_to_md(self.content, latex_gif=latex_gif)
+            content = type(self).convert_tw5_to_md(self.content)
         elif self.type_ == 'text/html':
             content = pypandoc.convert_text(self.content, 'md', format='html')
         elif self.type_ == 'text/x-markdown':
@@ -133,11 +133,11 @@ class Tiddler(Tw5Mixin):
 
         return pypandoc.convert_text(content, format, format='md')
 
-    def export(self, format='md', latex_gif=False, encoding='utf-8'):
+    def export(self, format='md', encoding='utf-8'):
         '''the tiddler is exported to a markdown string'''
         result = self.export_header(encoding=encoding)
         result += '\n\n---\n\n'
-        result += self.export_content(latex_gif=latex_gif, encoding=encoding)
+        result += self.export_content(encoding=encoding)
 
         # if format == 'md':
         #     return result # speed up: no need to call pypandoc.convert_text below.
@@ -219,5 +219,4 @@ $$</pre>
 
     tiddler.open_in_browser('md')
     tiddler.open_in_browser('markdown_github')
-    tiddler.test_in_browser(conv, 'md')
     tiddler.open_in_browser('html')

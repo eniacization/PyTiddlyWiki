@@ -6,7 +6,7 @@ from datetime import datetime
 class Tw5Mixin:
 
     @staticmethod
-    def convert_tw5_to_md(text, latex_gif=False):
+    def convert_tw5_to_md(text):
         """convert a tw5-flavored md text to a github-flavored md"""
         assert isinstance(text, str)
 
@@ -99,18 +99,12 @@ class Tw5Mixin:
 
             text = text[:match.start()] + quote + text[match.end():]
 
-        if latex_gif:
-            # replace latex by gif image with codecogs.com
-            text = re.sub('\$\$(?P<math>.+?)\$\$',
-                          '![\g<math>](https://latex.codecogs.com/gif.latex?\g<math>)',
-                          text)
-        else:
-            # convert $$ to $
-            # TODO: drawback: inline formulas of the form 'some text $$ a^2 $$ some text' are not matched
-            # TODO: two consecutive centered formula may lead to string '$$$$', which should not be converted
-            text = re.sub('((?<!\n)\$\$|\$\$(?!\n|$))',
-                          '$',
-                          text)
+        # convert $$ to $
+        # TODO: drawback: inline formulas of the form 'some text $$ a^2 $$ some text' are not matched
+        # TODO: two consecutive centered formula may lead to string '$$$$', which should not be converted
+        text = re.sub('((?<!\n)\$\$|\$\$(?!\n|$))',
+                      '$',
+                      text)
 
         # TODO: convert tables
         # TODO: convert definitions
