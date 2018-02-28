@@ -1,7 +1,7 @@
 # PyTiddlyWiki
 
 [TiddlyWiki](https://github.com/Jermolene/TiddlyWiki5) is a non-linear notebook written in JavaScript and contained in a single html file.
-This Python module allows you to
+__PyTiddlyWiki__ allows you to
 
 * parse a standalone TiddlyWiki html file
 * filter and sort Tiddlers
