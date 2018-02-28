@@ -99,13 +99,14 @@ class Tiddler(Tw5Mixin):
 
     # TODO: use the pandoc-markdown header notation
     def export_header(self, format='md', encoding='utf-8'):
+        '''export the tiddler head (containing title, creation date, and tags).
+        format can be any valid pandoc format specifier.
+        '''
         result = '# ' + self.title + '\n'
         result += '__created__: ' + str(self.created) + ',  '
         result += '__last modified__: ' + str(self.modified) + '\n\n'
         result += '__keywords__: ' + str(self.tags)
 
-        # if format == 'md':
-        #     return result # speed up: no need to call pypandoc.convert_text below.
         if encoding != 'utf-8':
             result = result.encode(encoding, errors='ignore').decode(encoding)
 
@@ -113,7 +114,7 @@ class Tiddler(Tw5Mixin):
 
     def export_content(self, format='md', encoding='utf-8'):
         '''export the tiddler content.
-        format is any valid pandoc format specifier.
+        format can be any valid pandoc format specifier.
         first, the tiddler content is converted to github flavored markdown.
         then pypandoc is used to convert the md file to the desired format.
         '''
@@ -126,21 +127,18 @@ class Tiddler(Tw5Mixin):
         else:
             content = self.content
 
-        # if format == 'md':
-        #     return content # speed up: no need to call pypandoc.convert_text below.
         if encoding != 'utf-8':
             content = content.encode(encoding, errors='ignore').decode(encoding)
 
         return pypandoc.convert_text(content, format, format='md')
 
     def export(self, format='md', encoding='utf-8'):
-        '''the tiddler is exported to a markdown string'''
+        '''export the tiddler to a string.
+        format can be any valid pandoc format specifier.
+        '''
         result = self.export_header(encoding=encoding)
         result += '\n\n---\n\n'
         result += self.export_content(encoding=encoding)
-
-        # if format == 'md':
-        #     return result # speed up: no need to call pypandoc.convert_text below.
 
         try:
             result = pypandoc.convert_text(result, format, format='md')
@@ -151,7 +149,9 @@ class Tiddler(Tw5Mixin):
         return result
 
     def export_to_file(self, path, format=None, encoding='utf-8'):
-
+        '''export the tiddler to a file at dir <path>.
+        format can be any valid pandoc format specifier.
+        '''
         if format is None:
             format = path.split('.')[-1]
         # pandoc uses latex when converting to pdf.
@@ -170,8 +170,6 @@ class Tiddler(Tw5Mixin):
             encoding = 'latin-1'
 
         md = self.export(encoding=encoding)
-
-        # if format == 'md': use write instead of convert_text for speedup?
         pypandoc.convert_text(md, format, format='md', outputfile=path)
 
     def open_in_browser(self, format='html'):
@@ -212,10 +210,7 @@ $$</pre>
 </div>"""
 
     tiddler = Tiddler.parse_from_string(tiddler_string)
-
     print(tiddler)
-
-    conv = Tiddler.convert_tw5_to_md(tiddler.content)
 
     tiddler.open_in_browser('md')
     tiddler.open_in_browser('markdown_github')
