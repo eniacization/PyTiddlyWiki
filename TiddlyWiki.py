@@ -1,5 +1,4 @@
 # TODO: implement export_tiddler in TiddlyWiki, in order to handle transclusions
-# TODO: add title and subtitle
 import re
 
 from Tiddler import Tiddler
@@ -86,6 +85,11 @@ class TiddlyWiki:
 
 if __name__ == "__main__":
 
+    from Algorithm import ExportToFile
+    import time
+
+    t0 = time.time()
+
     tw5 = TiddlyWiki.parse_from_html('./example/empty.html')
 
     print(tw5.title)
@@ -93,3 +97,7 @@ if __name__ == "__main__":
 
     for tiddler in tw5:
         print(tiddler.title)
+
+    tw5.apply(ExportToFile('./tw5.pdf', '--toc'))
+
+    print(str(time.time() - t0))

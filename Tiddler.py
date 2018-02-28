@@ -97,7 +97,21 @@ class Tiddler(Tw5Mixin):
 
         return result
 
-    def export_content(self, format='md', latex_gif=False):
+    # TODO: use the pandoc-markdown header notation
+    def export_header(self, format='md', encoding='utf-8'):
+        result = '# ' + self.title + '\n'
+        result += '__created__: ' + str(self.created) + ',  '
+        result += '__last modified__: ' + str(self.modified) + '\n\n'
+        result += '__keywords__: ' + str(self.tags)
+
+        # if format == 'md':
+        #     return result # speed up: no need to call pypandoc.convert_text below.
+        if encoding != 'utf-8':
+            result = result.encode(encoding, errors='ignore').decode(encoding)
+
+        return pypandoc.convert_text(result, format, format='md')
+
+    def export_content(self, format='md', latex_gif=False, encoding='utf-8'):
         '''export the tiddler content.
         format is any valid pandoc format specifier.
         first, the tiddler content is converted to github flavored markdown.
@@ -109,19 +123,24 @@ class Tiddler(Tw5Mixin):
             content = pypandoc.convert_text(self.content, 'md', format='html')
         elif self.type_ == 'text/x-markdown':
             content = self.content
-            print(type(content))
         else:
             content = self.content
 
+        # if format == 'md':
+        #     return content # speed up: no need to call pypandoc.convert_text below.
+        if encoding != 'utf-8':
+            content = content.encode(encoding, errors='ignore').decode(encoding)
+
         return pypandoc.convert_text(content, format, format='md')
 
-    def export(self, format='md', latex_gif=False):
+    def export(self, format='md', latex_gif=False, encoding='utf-8'):
         '''the tiddler is exported to a markdown string'''
-        result = '# ' + self.title + '\n'
-        result += '**created**: ' + str(self.created) + ',  '
-        result += '**last modified**: ' + str(self.modified) + '\n\n'
-        result += '**keywords**: ' + str(self.tags) + '\n\n---\n\n'
-        result += self.export_content(latex_gif=latex_gif)
+        result = self.export_header(encoding=encoding)
+        result += '\n\n---\n\n'
+        result += self.export_content(latex_gif=latex_gif, encoding=encoding)
+
+        # if format == 'md':
+        #     return result # speed up: no need to call pypandoc.convert_text below.
 
         try:
             result = pypandoc.convert_text(result, format, format='md')
@@ -131,37 +150,34 @@ class Tiddler(Tw5Mixin):
 
         return result
 
-    def export_to_file(self, path, format=None):
+    def export_to_file(self, path, format=None, encoding='utf-8'):
 
         if format is None:
             format = path.split('.')[-1]
-            # format = os.path.splitext(path)[1][1:]
+        # pandoc uses latex when converting to pdf.
+        # unfortunately, the latex packet inputenc.sty doesn't use the utf-8 codec for unicode
+        # (see: http://texdoc.net/texmf-dist/doc/latex/base/inputenc.pdf).
+        # hence, some special characters can lead to runtime errors,
+        # when pandocs tries to convert to latex.
+        # to avoid these errors, the unicode string md is first encoded with a codec
+        # (such as latin-1) that lacks these special characters and has less code points than utf-8.
+        # (a list of codecs in python is https://docs.python.org/3.6/library/codecs.html#standard-encodings)
+        # some code points associated to exotic characters
+        # will be lost during this encoding (errors='ignore').
+        # the (possibly trimmed) byte-string is then decoded back to unicode with the consequence
+        # that all 'dangerous' characters are cut off.
+        if format in {'pdf'}:
+            encoding = 'latin-1'
 
-        md = self.export()
+        md = self.export(encoding=encoding)
 
-        if format == 'pdf':
-            # pandoc uses latex when converting to pdf.
-            # unfortunately, the latex packet inputenc.sty doesn't use the utf-8 codec for unicode
-            # (see: http://texdoc.net/texmf-dist/doc/latex/base/inputenc.pdf).
-            # hence, some special characters can lead to runtime errors,
-            # when pandocs tries to convert to latex.
-            # to avoid these errors, the unicode string md is first encoded with a codec
-            # (such as latin-1) that lacks these special characters and has less code points than utf-8.
-            # (a list of codecs in python is https://docs.python.org/3.6/library/codecs.html#standard-encodings)
-            # some code points corresponding to exotic characters
-            # will be lost during this encoding (errors='ignore').
-            # the (possibly trimmed) byte-string is then decoded back to unicode with the consequence
-            # that all 'dangerous' characters are cut off.
-            md = md.encode('latin-1', errors='ignore').decode('latin-1')
-
+        # if format == 'md': use write instead of convert_text for speedup?
         pypandoc.convert_text(md, format, format='md', outputfile=path)
 
-    # TODO: use export_to_file
-    def open_in_browser(self, format='html', latex_gif=False):
+    def open_in_browser(self, format='html'):
 
         with tempfile.NamedTemporaryFile('w', suffix='.'+format, delete=False) as fh:
-            md = self.export(format=format, latex_gif=latex_gif)
-            fh.write(md)
+            self.export_to_file(fh.name, format=format)
 
         webbrowser.get(using='chrome').open('file://' + fh.name, new = 1)
 
@@ -172,7 +188,8 @@ if __name__ == "__main__":
 <div created="20180108222550419" modified="20180111174922056" tags="[[multi word tag]] tag2 tag3" title="just a test" tmap.id="8b72e085-396b-4145-92aa-6793964cedad">
 <pre>!This is a test tiddler.
 
-* bullet
+* nested
+** bullet
 * points
 
 # enumeration
@@ -180,6 +197,11 @@ if __name__ == "__main__":
 # two
 
 ''bold'' //italic//
+
+&lt;&lt;&lt; This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long quote
+on many lines
+
+by a &lt;&lt;&lt; wise man
 
 in line math formula $$a^2+b^2=c^2$$. this is the [[pythagorean theorem|https://en.wikipedia.org/wiki/Pythagorean_theorem]].
 
@@ -193,4 +215,9 @@ $$</pre>
 
     print(tiddler)
 
-    tiddler.open_in_browser()
+    conv = Tiddler.convert_tw5_to_md(tiddler.content)
+
+    tiddler.open_in_browser('md')
+    tiddler.open_in_browser('markdown_github')
+    tiddler.test_in_browser(conv, 'md')
+    tiddler.open_in_browser('html')
