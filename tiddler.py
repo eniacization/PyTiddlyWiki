@@ -3,7 +3,7 @@ import reprlib
 import tempfile
 import webbrowser
 
-from Tw5Mixin import Tw5Mixin
+from tw5mixin import Tw5Mixin
 import pypandoc
 
 
