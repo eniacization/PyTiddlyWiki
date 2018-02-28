@@ -85,7 +85,7 @@ class TiddlyWiki:
 
 if __name__ == "__main__":
 
-    from Algorithm import ExportToFile
+    from algorithm import ExportToFile
     import time
 
     t0 = time.time()
