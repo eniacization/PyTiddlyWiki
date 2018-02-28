@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     t0 = time.time()
 
-    tw5 = TiddlyWiki.parse_from_html('./example/empty.html')
+    tw5 = TiddlyWiki.parse_from_html('./example/tw5.html')
 
     print(tw5.title)
     print(tw5.subtitle)
