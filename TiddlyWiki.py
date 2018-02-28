@@ -1,7 +1,7 @@
 # TODO: implement export_tiddler in TiddlyWiki, in order to handle transclusions
 import re
 
-from Tiddler import Tiddler
+from tiddler import Tiddler
 
 
 class TiddlyWiki:
