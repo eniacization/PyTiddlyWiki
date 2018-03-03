@@ -6,6 +6,7 @@ from datetime import datetime
 class Tw5Mixin:
 
     # TODO: improve readibility of this function
+    # TODO: use pandoc custom writers instead? see 'pandoc --print-default-data-file sample.lua'
     @staticmethod
     def convert_tw5_to_md(text):
         """convert a tw5-flavored md text to a github-flavored md"""
@@ -182,13 +183,12 @@ class Tw5Mixin:
         RE_LINK = re.compile('\[\[(?P<link>.*?)\]\]')
 
         result = []
-        m = re.search(RE_LINK, tag_string)
-        while m:
-            result.append(m.group('link'))
-            s = m.start()
-            e = m.end()
+        matches = list(re.finditer(RE_LINK, tag_string))
+        for match in reversed(matches):
+            result.append(match.group('link'))
+            s = match.start()
+            e = match.end()
             tag_string = tag_string[:s] + tag_string[e:]
-            m = re.search(RE_LINK, tag_string)
 
         result += tag_string.split()
 
