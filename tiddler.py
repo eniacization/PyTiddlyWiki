@@ -20,6 +20,9 @@ class Tiddler(Tw5Mixin):
 
     def __init__(self, content, title=None, tags=None, created=None, modified=None,
                  type='text/vnd.tiddlywiki', **kwargs):
+        """besides standard attributes (title, tags, created, modified, type_)
+        an arbitrary number of kwargs is added to the Tiddler namespace __dict__.
+        """
         self.content = content
         self.title = title
         self.tags = [] if tags is None else tags
@@ -30,13 +33,14 @@ class Tiddler(Tw5Mixin):
 
     @classmethod
     def finditer(cls, buffer):
-
+        """generator function, yielding Tiddler instances found in buffer.
+        The Tiddler initiator is invoked with the kwargs of all options found in buffer.
+        """
         for match in re.finditer(cls.RE_TIDDLER, buffer):
             options = match.group('options')
             content = match.group('content')
 
             attr = {}
-
             for match in re.finditer(cls.RE_OPTION, options):
                 key = match.group('key')
                 value = match.group('value')
@@ -70,7 +74,6 @@ class Tiddler(Tw5Mixin):
         """A Tiddler factory
         If buffer contains a tiddler, a Tiddler instance of the first tiddler is returned.
         If buffer does not contain any tiddler, None is returned.
-
         """
         try:
             return next(cls.finditer(buffer))
@@ -97,15 +100,15 @@ class Tiddler(Tw5Mixin):
 
         return result
 
-    # TODO: use the pandoc-markdown header notation
     def export_header(self, format='md', encoding='utf-8'):
         '''export the tiddler head (containing title, creation date, and tags).
         format can be any valid pandoc format specifier.
         '''
-        result = '# ' + self.title + '\n'
-        result += '__created__: ' + str(self.created) + ',  '
-        result += '__last modified__: ' + str(self.modified) + '\n\n'
-        result += '__keywords__: ' + str(self.tags)
+        header = "# {}\n" \
+                 "__created__: {}, " \
+                 "__last modified__: {}\n\n" \
+                 "__keywords__: {}"
+        result = header.format(self.title, self.created, self.modified, self.tags)
 
         if encoding != 'utf-8':
             result = result.encode(encoding, errors='ignore').decode(encoding)
@@ -142,10 +145,9 @@ class Tiddler(Tw5Mixin):
 
         try:
             result = pypandoc.convert_text(result, format, format='md')
-        except: # TODO: specify error
-            print("error occured")
+        except Exception as error: # TODO: specify Exception
+            print(error)
             result = None
-
         return result
 
     def export_to_file(self, path, format=None, encoding='utf-8'):
@@ -173,10 +175,8 @@ class Tiddler(Tw5Mixin):
         pypandoc.convert_text(md, format, format='md', outputfile=path)
 
     def open_in_browser(self, format='html'):
-
         with tempfile.NamedTemporaryFile('w', suffix='.'+format, delete=False) as fh:
             self.export_to_file(fh.name, format=format)
-
         webbrowser.get(using='chrome').open('file://' + fh.name, new = 1)
 
 
@@ -196,12 +196,17 @@ if __name__ == "__main__":
 
 ''bold'' //italic//
 
+~CamelCase ~CamelCase ~~strike through~~
+
 &lt;&lt;&lt; This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long quote
 on many lines
 
 by a &lt;&lt;&lt; wise man
 
 in line math formula $$a^2+b^2=c^2$$. this is the [[pythagorean theorem|https://en.wikipedia.org/wiki/Pythagorean_theorem]].
+second derivative: $$f''(x) + g''(x)$$. [[https://en.wikipedia.org/wiki/Pythagorean_theorem]].
+
+a formula ''within a bold text region $$a^2$$''.
 
 latex equation:
 $$

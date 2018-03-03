@@ -138,8 +138,12 @@ class ExportToFile:
                                       str(datetime.date.today()))
             fh.write(title)
 
-            for tiddler in safe_tiddlers:
-                tiddler_md = tiddler.export(encoding='latin-1')
+            for tiddler in tqdm.tqdm(safe_tiddlers):
+                if self.format in {'pdf'}:
+                    encoding = 'latin-1'
+                else:
+                    encoding = 'utf-8'
+                tiddler_md = tiddler.export(encoding=encoding)
                 fh.write(tiddler_md)
                 fh.write('\n\n---\n\n---\n\n')
 
@@ -150,7 +154,8 @@ class ExportToFile:
                               extra_args=self.extra_args)
 
         if non_safe_tiddlers:
-            print("Could only export {} out of {} tiddlers.".format(len(safe_tiddlers), len(tiddlers)))
+            msg = 'Could only export {} out of {} tiddlers.'
+            print(msg.format(len(safe_tiddlers), len(tiddlers)))
             print("The following tiddlers raised a pandoc error:")
             for tiddler in non_safe_tiddlers:
                 print("\t{}".format(tiddler.title))

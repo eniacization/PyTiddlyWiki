@@ -1,4 +1,3 @@
-# TODO: implement export_tiddler in TiddlyWiki, in order to handle transclusions
 import re
 
 from tiddler import Tiddler
@@ -6,7 +5,8 @@ from tiddler import Tiddler
 
 class TiddlyWiki:
 
-    RE_TITLE = re.compile('<title>(?P<title>[\w\W]*?) — (?P<subtitle>[\w\W]*?)</title>')
+    RE_TITLE = re.compile('<title>(?P<title>[\w\W]*?) — '
+                          '(?P<subtitle>[\w\W]*?)</title>')
 
     def __init__(self, title=None, subtitle=None, tiddlers=None):
         self.title = title
@@ -58,7 +58,6 @@ class TiddlyWiki:
     def parse_from_string(cls, buffer):
         """A TiddlyWiki factory
         Returns a TiddlyWiki instance containing all tiddlers found in string buffer
-
         """
         title, subtitle = cls.parse_title(buffer)
         tiddly_wiki = cls(title=title, subtitle=subtitle)
@@ -72,12 +71,16 @@ class TiddlyWiki:
     def parse_from_html(cls, html_file):
         """A TiddlyWiki factory
         Returns a TiddlyWiki instance containing all tiddlers found in html_file
-
         """
         with open(html_file, 'r') as html:
             buffer = html.read()
 
         return cls.parse_from_string(buffer)
+
+    # TODO: implement
+    @classmethod
+    def open_in_browser(cls, tiddler_iterable):
+        pass
 
     def apply(self, algorithm):
         return algorithm.evaluate(self)
