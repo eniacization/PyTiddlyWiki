@@ -31,6 +31,8 @@ class Tw5Mixin:
             match_string = ''.join(match_string.split())
             return '#' * len(match_string) + ' '
 
+        # TODO: remove links of images before conversion
+        # TODO: unify the remove/restore process of katex, links and images
         links = []
         def remove_links(text):
             def append_link(match):
@@ -84,8 +86,32 @@ class Tw5Mixin:
                           text)
             return text
 
+        # convert &lt; to <
+        text = re.sub('&lt;', '<', text)
+
+        # convert &gt; to >
+        text = re.sub('&gt;', '>', text)
+
+        # convert &amp; to &
+        text = re.sub('&amp;', '&', text)
+
+        # convert &quot; to "
+        text = re.sub('&quot;', '"', text)
+
         text = remove_katex(text)
         text = remove_links(text)
+
+        # convert multiline environment """<some text>"""
+        matches = list(re.finditer('^\"\"\"\n?(?P<multiline>[\w\W]*?)\n?\"\"\"',
+                                   text, flags=re.MULTILINE))
+        while matches:
+            match = matches.pop()
+            quote = match.group('multiline')
+            quote = re.sub('\n', '\\\n', quote)
+            text = text[:match.start()] + quote + text[match.end():]
+
+        # add additional blank lines before and after separator for safety
+        text = re.sub('(?<=\n)-{3,}(?=\n)', '\n\n---\n\n', text)
 
         # TODO: linked images on the web are not included correctly in pdf
         # convert images
@@ -117,15 +143,6 @@ class Tw5Mixin:
                       '_\g<phrase>_',
                       text)
 
-        # convert &lt; to <
-        text = re.sub('&lt;', '<', text)
-
-        # convert &gt; to >
-        text = re.sub('&gt;', '>', text)
-
-        # convert &amp; to &
-        text = re.sub('&amp;', '&', text)
-
         # remove single ~ in front of words
         text = re.sub('(?<!~)~(?!~)', '', text, flags=re.MULTILINE)
 
@@ -140,7 +157,6 @@ class Tw5Mixin:
             ref = match.group('ref').strip()
             if ref:
                 quote += '({})'.format(ref)
-
             text = text[:match.start()] + quote + text[match.end():]
 
         # TODO: convert tables

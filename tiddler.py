@@ -189,19 +189,32 @@ if __name__ == "__main__":
 * nested
 ** bullet
 * points
+*# point 1
+*# point 2
 
 # enumeration
 # one
 # two
+# hashtag sign # is used on twitter and instagram
 
 ''bold'' //italic//
 
 ~CamelCase ~CamelCase ~~strike through~~
 
 &lt;&lt;&lt; This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long quote
-on many lines
+on many lines 
 
 by a &lt;&lt;&lt; wise man
+
+separation bar
+---
+without blank lines before or after
+
+&quot;&quot;&quot;
+multi
+line
+environment
+&quot;&quot;&quot;
 
 in line math formula $$a^2+b^2=c^2$$. this is the [[pythagorean theorem|https://en.wikipedia.org/wiki/Pythagorean_theorem]].
 second derivative: $$f''(x) + g''(x)$$. [[https://en.wikipedia.org/wiki/Pythagorean_theorem]].
