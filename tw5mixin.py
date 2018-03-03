@@ -5,6 +5,7 @@ from datetime import datetime
 
 class Tw5Mixin:
 
+    # TODO: improve readibility of this function
     @staticmethod
     def convert_tw5_to_md(text):
         """convert a tw5-flavored md text to a github-flavored md"""
@@ -12,38 +13,78 @@ class Tw5Mixin:
 
         def convert_list_symbols(match):
             match_string = match.group('list_symbols')
-
             # remove all spaces, tabs, etc.
             match_string = ''.join(match_string.split())
-
             # add indentation
             result = '  ' * (len(match_string) - 1)
-
             # add bullet or number
             if match_string[-1] == '*':
                 result += '* ' # the ending space is important
             elif match_string[-1] == '#':
                 result += '1. ' # the ending space is important
-
             return result
 
         def convert_heading(match):
             match_string = match.group('heading')
-
             # remove all spaces, tabs, etc.
             match_string = ''.join(match_string.split())
-
             return '#' * len(match_string) + ' '
 
-        # convert links without reference
-        text = re.sub('\[\[(?P<name>[.^\|]+?)\]\]',
-                      '[\g<name>]',
-                      text)
+        links = []
+        def remove_links(text):
+            def append_link(match):
+                index = len(links)
+                if match.group('link2') is None:
+                    links.append(match.group('link1'))
+                    return '[[{}|{}]]'.format(match.group('name'), index)
+                else:
+                    links.append(match.group('link2'))
+                    return '[[{}]]'.format(index)
 
-        # convert links with reference
-        text = re.sub('\[\[(?P<name>[\w\W]+?)\|(?P<link>[\w\W]+?)\]\]',
-                      '[\g<name>](\g<link>)',
-                      text)
+            text = re.sub('\[\[(?P<name>[\w\W]+?)\|(?P<link1>[\w\W]+?)\]\]|\[\[(?P<link2>[^\|]+?)\]\]',
+                          append_link,
+                          text)
+            return text
+
+        katex = []
+        def remove_katex(text):
+            def append_katex(match):
+                index = len(katex)
+                katex.append(match.group('katex'))
+                return '$${}$$'.format(index)
+
+            text = re.sub('\$\$(?P<katex>[\w\W]*?)\$\$',
+                          append_katex,
+                          text)
+            return text
+
+        def restore_links(text):
+            def get_link(match):
+                if match.group('index2') is None:
+                    index = int(match.group('index1'))
+                    return '[[{}|{}]]'.format(match.group('name'), links[index])
+                else:
+                    index = int(match.group('index2'))
+                    return '[[{}]]'.format(links[index])
+
+            text = re.sub('\[\[(?P<name>[\w\W]+?)\|(?P<index1>\d+?)\]\]|'
+                          '\[\[(?P<index2>\d+?)\]\]',
+                          get_link,
+                          text)
+            return text
+
+        def restore_katex(text):
+            def get_katex(match):
+                index = int(match.group('index'))
+                return '$${}$$'.format(katex[index])
+
+            text = re.sub('\$\$(?P<index>\d*?)\$\$',
+                          get_katex,
+                          text)
+            return text
+
+        text = remove_katex(text)
+        text = remove_links(text)
 
         # TODO: linked images on the web are not included correctly in pdf
         # convert images
@@ -63,12 +104,13 @@ class Tw5Mixin:
                       text,
                       flags=re.MULTILINE)
 
+        # TODO: do not convert '' in urls and katex code
         # convert ''bold'' to __bold__
         text = re.sub('\'\'(?P<phrase>[\w\W]+?)\'\'',
                       '__\g<phrase>__',
                       text)
 
-        # TODO: do not convert slashes in urls
+        # TODO: do not convert slashes in urls and katex code
         # convert //italic// to _italic_
         text = re.sub('//(?P<phrase>[\w\W]+?)//',
                       '_\g<phrase>_',
@@ -84,10 +126,11 @@ class Tw5Mixin:
         text = re.sub('&amp;', '&', text)
 
         # remove single ~ in front of words
-        text = re.sub('(?<=\s)~(?!~)', '', text)
+        text = re.sub('(?<!~)~(?!~)', '', text, flags=re.MULTILINE)
 
         # convert block quote
-        matches = list(re.finditer('^<<<[\t ]*(?P<quote>[\w\W]*?)<<<(?P<ref>[\w\W]*?)(?=\n)', text, flags=re.MULTILINE))
+        matches = list(re.finditer('^<<<[\t ]*(?P<quote>[\w\W]*?)<<<(?P<ref>[\w\W]*?)(?=\n)',
+                                   text, flags=re.MULTILINE))
         while matches:
             match = matches.pop()
             quote = match.group('quote')
@@ -99,6 +142,13 @@ class Tw5Mixin:
 
             text = text[:match.start()] + quote + text[match.end():]
 
+        # TODO: convert tables
+        # TODO: convert definitions
+        # TODO: how to handle transclusions (in tiddlywiki.TiddlyWiki?)
+        # TODO: how to handel links to other tiddlers?
+
+        text = restore_katex(text)
+
         # convert $$ to $
         # TODO: drawback: inline formulas of the form 'some text $$ a^2 $$ some text' are not matched
         # TODO: two consecutive centered formula may lead to string '$$$$', which should not be converted
@@ -106,8 +156,17 @@ class Tw5Mixin:
                       '$',
                       text)
 
-        # TODO: convert tables
-        # TODO: convert definitions
+        text = restore_links(text)
+
+        # convert links without reference
+        text = re.sub('\[\[(?P<link>[^\|]+?)\]\]',
+                      '[\g<link>](\g<link>)',
+                      text)
+
+        # convert links with reference
+        text = re.sub('\[\[(?P<name>[\w\W]+?)\|(?P<link>[\w\W]+?)\]\]',
+                      '[\g<name>](\g<link>)',
+                      text)
 
         return text
 
@@ -137,7 +196,7 @@ class Tw5Mixin:
 
     @staticmethod
     def string_to_date(date_string):
-        '''gets a string of digits, e.g. 20180101201500.
+        '''gets a string of digits, e.g. '20180101201500'.
         the first 14 digits are being interpreted as year+month+day+hour+minute+sec
         returns a datetime object.
         '''
