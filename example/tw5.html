@@ -288,6 +288,14 @@ Error message and password prompt
 
 <li>$:/themes/tiddlywiki/vanilla</li>
 
+<li>2018-01-01</li>
+
+<li>2018-01-15</li>
+
+<li>2018-02-01</li>
+
+<li>2018-02-22</li>
+
 <li>Albert Einstein</li>
 
 <li>bad latex</li>
@@ -298,9 +306,13 @@ Error message and password prompt
 
 <li>Kurt Vonnegut</li>
 
+<li>listing</li>
+
 <li>Lorem Ipsum</li>
 
 <li>Tom Hanks</li>
+
+<li>transclusion</li>
 
 </ul>
 </p>
@@ -8727,8 +8739,8 @@ Error message and password prompt
 <div created="20180225223915396" modified="20180225223917011" title="$:/SiteTitle">
 <pre>Example ~TiddlyWiki</pre>
 </div>
-<div created="20180228225142740" modified="20180228225142740" title="$:/state/showeditpreview">
-<pre>yes</pre>
+<div created="20180228225142740" modified="20180301144356532" title="$:/state/showeditpreview">
+<pre>no</pre>
 </div>
 <div created="20180228225500464" modified="20180228225502255" title="$:/state/tab--86143343">
 <pre>$:/core/ui/ControlPanel/Plugins/Installed/Plugins</pre>
@@ -8739,7 +8751,7 @@ Error message and password prompt
 <div created="20180225223955097" modified="20180226050603855" title="$:/state/tab/sidebar--1835078512">
 <pre>$:/core/ui/SideBar/Open</pre>
 </div>
-<div list="" title="$:/StoryList">
+<div list="2018-02-22 2018-02-01 2018-01-15 2018-01-01" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -9072,7 +9084,7 @@ It is currently based on KaTeX version 0.6.0. See https://github.com/Khan/KaTeX/
 " server-url="https://tiddlywiki.com/library/v5.1.15/index.html" tags="$:/tags/RemoteAssetInfo" title="$:/temp/RemoteAssetInfo/https://tiddlywiki.com/library/v5.1.15/index.html/$:/plugins/tiddlywiki/katex" type="text/vnd.tiddlywiki" version="5.1.15">
 <pre></pre>
 </div>
-<div author="JeremyRuston" core-version="&gt;=5.0.0" created="20180228225505064" dependents="" description="Markdown parser" list="readme usage" modified="20180228225505064" original-plugin-type="plugin" original-tags="" original-title="$:/plugins/tiddlywiki/markdown" original-type="application/json" readme="This is a TiddlyWiki plugin for parsing Markdown text, based on the [[markdown-js|https://github.com/evilstreak/markdown-js]] project from Dominic Baggott. 
+<div author="JeremyRuston" core-version="&gt;=5.0.0" created="20180228225505064" dependents="" description="Markdown parser" list="readme usage" modified="20180228225505064" original-plugin-type="plugin" original-tags="" original-title="$:/plugins/tiddlywiki/markdown" original-type="application/json" readme="This is a TiddlyWiki plugin for parsing Markdown text, based on the [[markdown-js|https://github.com/evilstreak/markdown-js]] project from Dominic Baggott.
 
 It is completely self-contained, and doesn't need an Internet connection in order to work. It works both in the browser and under Node.js.
 
@@ -9247,7 +9259,7 @@ This plugin also requires the JSZip plugin ([[$:/plugins/tiddlywiki/jszip]]) to 
 <div created="20180228225507607" modified="20180228225508451" title="$:/temp/RemoteAssetSearch/$:/config/OfficialPluginLibrary">
 <pre>katex</pre>
 </div>
-<div created="20180226050454858" modified="20180228225911463" title="$:/temp/search">
+<div created="20180226050454858" modified="20180301144720438" title="$:/temp/search">
 <pre></pre>
 </div>
 <div created="20180228225505059" modified="20180228225505059" tags="$:/tags/ServerConnection" title="$:/temp/ServerConnection/https://tiddlywiki.com/library/v5.1.15/index.html" url="https://tiddlywiki.com/library/v5.1.15/index.html">
@@ -9362,6 +9374,18 @@ This plugin also requires the JSZip plugin ([[$:/plugins/tiddlywiki/jszip]]) to 
     }
 }</pre>
 </div>
+<div created="20180101225247043" modified="20180101225604124" tags="journal" title="2018-01-01">
+<pre>first day of the year.</pre>
+</div>
+<div created="20180115225605956" modified="20180115225640340" tags="journal" title="2018-01-15">
+<pre>middle of january.</pre>
+</div>
+<div created="20180201225641838" modified="20180201225730618" tags="journal" title="2018-02-01">
+<pre>today starts february.</pre>
+</div>
+<div created="20180222225734059" modified="20180222225910295" tags="journal" title="2018-02-22">
+<pre>initial commit of ~PyTiddlyWiki project.</pre>
+</div>
 <div created="20180225224909034" modified="20180228212156351" tags="" title="Albert Einstein">
 <pre>! Über die von der molekularkinetischen Theorie der Wärme geforderte Bewegung von in ruhenden Flüssigkeiten suspendierten Teilchen
 
@@ -9392,10 +9416,10 @@ iggy pop</pre>
 
 ''bold'' //italic//
 
-&lt;&lt;&lt; This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long quote 
+&lt;&lt;&lt; This is a very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long quote
 on many lines
 
-by a 
+by a
 &lt;&lt;&lt; wise man
 
 in line math formula $$a^2+b^2=c^2$$. this is the [[pythagorean theorem|https://en.wikipedia.org/wiki/Pythagorean_theorem]].
@@ -9416,11 +9440,18 @@ Cheers --
 
 Kurt Vonnegut</pre>
 </div>
+<div created="20180301144421614" modified="20180301144536505" tags="" title="listing" type="text/vnd.tiddlywiki">
+<pre>* item1
+* item2
+** item2a
+** item2b
+* item3</pre>
+</div>
 <div created="20180225224028096" modified="20180225224119377" tags="" title="Lorem Ipsum">
 <pre>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</pre>
 </div>
 <div created="20180225224408721" modified="20180225224425737" tags="letter" title="Tom Hanks">
-<pre>Dear Chris, Ashley, and all the diabolical genuies at Nerdist Industries. 
+<pre>Dear Chris, Ashley, and all the diabolical genuies at Nerdist Industries.
 
 Just who do you think you are to try to briibe me into an apperance on your 'thing' with this gift of the most fantastic Cornona Silent typewriter made in 1934?
 
@@ -9433,6 +9464,11 @@ I will have my people contact yours and work out some kind of interview process.
 Damn you all to hell,
 
 (Signed, 'Tom Hanks')</pre>
+</div>
+<div created="20180301144354119" modified="20180301144522586" tags="" title="transclusion">
+<pre>this is a transclusion:
+
+{{listing}}</pre>
 </div>
 
 </div>
