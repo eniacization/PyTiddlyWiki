@@ -1,6 +1,5 @@
 from tiddlywiki import TiddlyWiki
-from algorithm import FindAllTiddlers, ExportToFile
-
+from algorithm import FindAllTiddlers, ExportToFile, OpenInBrowser
 
 tw5 = TiddlyWiki.parse_from_html('./example/tw5.html')
 
@@ -13,8 +12,13 @@ for tiddler in journal_tiddlers:
 for tiddler in journal_tiddlers:
     tiddler.export_to_file('./example/' + tiddler.title + '.pdf')
 
-algorithm = ExportToFile('./example/tw5_journal.pdf',
-                         '--toc',
-                         key=lambda t: t.created,
-                         predicates=[predicate])
-tw5.apply(algorithm)
+export_journal = ExportToFile('./example/tw5_journal.pdf',
+                              '--toc',
+                              key=lambda t: t.created,
+                              predicates=[predicate])
+tw5.apply(export_journal)
+
+open_journals_in_browser = OpenInBrowser('--toc',
+                                         key=lambda t: t.created,
+                                         predicates=[predicate])
+tw5.apply(open_journals_in_browser)

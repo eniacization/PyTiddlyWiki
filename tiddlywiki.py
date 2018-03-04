@@ -77,11 +77,6 @@ class TiddlyWiki:
 
         return cls.parse_from_string(buffer)
 
-    # TODO: implement
-    @classmethod
-    def open_in_browser(cls, tiddler_iterable):
-        pass
-
     def apply(self, algorithm):
         return algorithm.evaluate(self)
 

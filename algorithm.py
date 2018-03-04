@@ -6,6 +6,8 @@ import tempfile
 import datetime
 
 import os
+import webbrowser
+
 import pypandoc
 import tqdm
 
@@ -55,12 +57,13 @@ class FindAllTiddlers(Algorithm):
                 yield tiddler
 
 # TODO: non-linear toc?
-class ExportToFile:
+class ExportToFile(Algorithm):
 
     MAX_WORKERS = os.cpu_count()
 
     def __init__(self, path, *extra_args, format=None, predicates=None, key=None):
         self.path = path
+        self.extra_args = extra_args
         if format is None:
             self.format = path.split('.')[-1]
         else:
@@ -70,16 +73,15 @@ class ExportToFile:
             self.key = lambda t: t.created
         else:
             self.key = key
-        self.extra_args = extra_args
 
-    def _get_tiddlers(self, tiddly_wiki):
+    def __get_tiddlers(self, tiddly_wiki):
         if self.predicates is not None:
             tiddlers = list(tiddly_wiki.apply(FindAllTiddlers(*self.predicates)))
         else:
             tiddlers = list(tiddly_wiki)
         return tiddlers
 
-    def _get_safe_tiddlers(self, iterable_tiddlers):
+    def __get_safe_tiddlers(self, iterable_tiddlers):
         safe_tiddlers = []
         non_safe_tiddlers = []
 
@@ -95,8 +97,7 @@ class ExportToFile:
 
         return safe_tiddlers, non_safe_tiddlers
 
-    def _get_safe_tiddlers_multithread(self, iterable_tiddlers):
-
+    def __get_safe_tiddlers_multithread(self, iterable_tiddlers):
         workers = min(len(iterable_tiddlers), self.MAX_WORKERS)
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor, \
                 tempfile.NamedTemporaryFile('w', suffix='.'+self.format) as fh:
@@ -121,10 +122,9 @@ class ExportToFile:
         return safe_tiddlers, non_safe_tiddlers
 
     def evaluate(self, tiddly_wiki):
-
-        tiddlers = self._get_tiddlers(tiddly_wiki)
+        tiddlers = self.__get_tiddlers(tiddly_wiki)
         if self.format in {'pdf'}:
-            safe_tiddlers, non_safe_tiddlers = self._get_safe_tiddlers_multithread(tiddlers)
+            safe_tiddlers, non_safe_tiddlers = self.__get_safe_tiddlers_multithread(tiddlers)
         else:
             safe_tiddlers = tiddlers
             non_safe_tiddlers = []
@@ -159,3 +159,50 @@ class ExportToFile:
             print("The following tiddlers raised a pandoc error:")
             for tiddler in non_safe_tiddlers:
                 print("\t{}".format(tiddler.title))
+
+
+class OpenInBrowser(Algorithm):
+
+    def __init__(self, *extra_args, format='html', predicates=None, key=None):
+        self.extra_args = extra_args
+        self.format = format
+        self.predicates = predicates
+        if key is None:
+            self.key = lambda t: t.created
+        else:
+            self.key = key
+
+    def __get_tiddlers(self, tiddly_wiki):
+        if self.predicates is not None:
+            tiddlers = list(tiddly_wiki.apply(FindAllTiddlers(*self.predicates)))
+        else:
+            tiddlers = list(tiddly_wiki)
+        return tiddlers
+
+    def evaluate(self, tiddly_wiki):
+        tiddlers = self.__get_tiddlers(tiddly_wiki)
+        tiddlers.sort(key=self.key)
+        with tempfile.NamedTemporaryFile('w', suffix='.'+self.format, delete=False) as fh:
+            title = '% {}\n' \
+                    '% {}\n' \
+                    '% {}\n\n'.format(tiddly_wiki.title,
+                                      tiddly_wiki.subtitle,
+                                      str(datetime.date.today()))
+            result = title
+
+            for tiddler in tqdm.tqdm(tiddlers):
+                if self.format in {'pdf'}:
+                    encoding = 'latin-1'
+                else:
+                    encoding = 'utf-8'
+                tiddler_md = tiddler.export(encoding=encoding)
+                result += tiddler_md
+                result += '\n\n---\n\n---\n\n'
+
+            pypandoc.convert_text(result,
+                                  self.format,
+                                  format='md',
+                                  outputfile=fh.name,
+                                  extra_args=self.extra_args)
+            webbrowser.get(using='chrome').open('file://' + fh.name, new=1)
+
