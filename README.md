@@ -60,11 +60,11 @@ for tiddler in journal_tiddlers:
 ````python
 from algorithm import ExportToFile
 
-algorithm = ExportToFile('./example/tw5_journal.pdf',
-                         '--toc',
-                         key=lambda t: t.created,
-                         predicates=[predicate])
-tw5.apply(algorithm)
+export_journal = ExportToFile('./example/tw5_journal.pdf',
+                              '--toc',
+                              key=lambda t: t.created,
+                              predicates=[predicate])
+tw5.apply(export_journal)
 ```` 
 
 ## format specifiers

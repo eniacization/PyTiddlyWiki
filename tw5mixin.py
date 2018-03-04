@@ -131,13 +131,11 @@ class Tw5Mixin:
                       text,
                       flags=re.MULTILINE)
 
-        # TODO: do not convert '' in urls and katex code
         # convert ''bold'' to __bold__
         text = re.sub('\'\'(?P<phrase>[\w\W]+?)\'\'',
                       '__\g<phrase>__',
                       text)
 
-        # TODO: do not convert slashes in urls and katex code
         # convert //italic// to _italic_
         text = re.sub('//(?P<phrase>[\w\W]+?)//',
                       '_\g<phrase>_',
