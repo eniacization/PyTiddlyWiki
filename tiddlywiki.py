@@ -1,9 +1,11 @@
 import re
 
+from searchwikimixin import SearchWikiMixin
+from exportwikimixin import ExportWikiMixin
 from tiddler import Tiddler
 
 
-class TiddlyWiki:
+class TiddlyWiki(SearchWikiMixin, ExportWikiMixin):
 
     RE_TITLE = re.compile('<title>(?P<title>[\w\W]*?) — '
                           '(?P<subtitle>[\w\W]*?)</title>')
