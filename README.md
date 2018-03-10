@@ -35,10 +35,8 @@ tw5 = TiddlyWiki.parse_from_html('./example/tw5.html')
 #### filter Tiddlers from a TiddlyWiki
 
 ````python
-from algorithm import FindAllTiddlers
-
 predicate = lambda t: 'journal' in t.tags
-journal_tiddlers = list(tw5.apply(FindAllTiddlers(predicate)))
+journal_tiddlers = list(tw5.finditer(predicate))
 ````
 
 #### open Tiddler in browser
@@ -58,13 +56,10 @@ for tiddler in journal_tiddlers:
 #### export TiddlyWiki as pdf
 
 ````python
-from algorithm import ExportToFile
-
-export_journal = ExportToFile('./example/tw5_journal.pdf',
-                              '--toc',
-                              key=lambda t: t.created,
-                              predicates=[predicate])
-tw5.apply(export_journal)
+tw5.export_to_file('./example/tw5_journal.pdf',
+                   '--toc',
+                   key=lambda t: t.created,
+                   predicates=[predicate])
 ```` 
 
 ## format specifiers
