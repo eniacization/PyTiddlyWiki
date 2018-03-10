@@ -72,7 +72,7 @@ class TiddlyWiki:
         """A TiddlyWiki factory
         Returns a TiddlyWiki instance containing all tiddlers found in html_file
         """
-        with open(html_file, 'r') as html:
+        with open(html_file, 'r', encoding='utf8') as html:
             buffer = html.read()
 
         return cls.parse_from_string(buffer)
