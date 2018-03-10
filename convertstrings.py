@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 
 
-class Tw5Mixin:
+class ConvertStringsMixin:
 
     # TODO: improve readibility of this function
     # TODO: use pandoc custom writers instead? see 'pandoc --print-default-data-file sample.lua'

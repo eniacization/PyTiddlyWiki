@@ -1,7 +1,7 @@
 import re
 
-from searchwikimixin import SearchWikiMixin
-from exportwikimixin import ExportWikiMixin
+from searchwiki import SearchWikiMixin
+from exportwiki import ExportWikiMixin
 from tiddler import Tiddler
 
 

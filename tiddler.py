@@ -3,11 +3,11 @@ import reprlib
 import tempfile
 import webbrowser
 
-from tw5mixin import Tw5Mixin
+from convertstrings import ConvertStringsMixin
 import pypandoc
 
 
-class Tiddler(Tw5Mixin):
+class Tiddler(ConvertStringsMixin):
 
     RE_TIDDLER = re.compile('<div'
                             '(?P<options>[\w\W]*?)'
