@@ -1,3 +1,7 @@
 venv/
 *.pdf
 .idea/
+.venv/
+Pipfile
+Pipfile.lock
+__pycache__/

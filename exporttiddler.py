@@ -86,4 +86,5 @@ class ExportTiddlerMixin:
     def open_in_browser(self, format='html'):
         with tempfile.NamedTemporaryFile('w', suffix='.' + format, delete=False) as fh:
             self.export_to_file(fh.name, format=format)
-        webbrowser.get(using='chrome').open('file://' + fh.name, new=1)
+        #webbrowser.get(using='chrome').open('file://' + fh.name, new=1)
+        webbrowser.get().open('file://' + fh.name, new=1)
