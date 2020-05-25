@@ -9,9 +9,9 @@ for tiddler in journal_tiddlers:
     tiddler.open_in_browser()
 
 for tiddler in journal_tiddlers:
-    tiddler.export_to_file('./example/' + tiddler.title + '.pdf')
+    tiddler.export_to_file('./example/' + tiddler.title + '.zimwiki')
 
-tw5.export_to_file('./example/tw5_journal.pdf',
+tw5.export_to_file('./example/tw5_journal.markdown',
                    '--toc',
                    key=lambda t: t.created,
                    predicates=[predicate])

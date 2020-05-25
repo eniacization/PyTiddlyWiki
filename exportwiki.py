@@ -130,5 +130,6 @@ class ExportWikiMixin:
                                   format='md',
                                   outputfile=fh.name,
                                   extra_args=extra_args)
-            webbrowser.get(using='chrome').open('file://' + fh.name, new=1)
+            #webbrowser.get(using='chrome').open('file://' + fh.name, new=1)
+            webbrowser.get().open('file://' + fh.name, new=1)
 
